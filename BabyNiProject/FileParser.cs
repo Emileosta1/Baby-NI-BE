@@ -66,7 +66,6 @@ namespace BabyNiProject
 
         private void ModifyDataForRadioLinkPower(List<Dictionary<string, string>> data, string fileName)
         {
-            // Apply modifications specific to files containing "RADIO_LINK_POWER" in the name
             // Create a list of rows to delete
             List<Dictionary<string, string>> rowsToDelete = new List<Dictionary<string, string>>();
 
@@ -79,9 +78,7 @@ namespace BabyNiProject
                     rowsToDelete.Add(row);
                 }
 
-                // Add or modify other columns as needed
-                // row["new_column_radio"] = "new_value_for_radio"; // Add a new column
-                row.Remove("NodeName"); // Delete a specific column
+                row.Remove("NodeName");
                 row.Remove("Position");
                 row.Remove("IdLogNum");
             }
@@ -92,7 +89,6 @@ namespace BabyNiProject
                 data.Remove(rowToDelete);
             }
 
-            // Call the combined method to add the "NETWORK_SID" and "DATETIME_KEY" columns
             AddNetworkSidAndDatetimeKeyColumns(data, fileName);
 
             AddLinkColumn(data);
@@ -110,7 +106,7 @@ namespace BabyNiProject
             if (DateTime.TryParseExact(dateTimePart, "yyyyMMdd_HHmmss", null, DateTimeStyles.None, out DateTime dateTime))
             {
                 string formattedDateTime = dateTime.ToString("dd/MM/yyyy HH:mm:ss");
-                DateTime test = DateTime.ParseExact(formattedDateTime, "dd/MM/yyyy HH:mm:ss", null);
+                DateTime reformat = DateTime.ParseExact(formattedDateTime, "dd/MM/yyyy HH:mm:ss", null);
 
                 foreach (var row in data)
                 {
@@ -120,14 +116,13 @@ namespace BabyNiProject
                         string neAlias = row["NeAlias"];
                         string neType = row["NeType"];
 
-                        // Calculate the hash value of NeAlias and NeType
                         string networkSid = CalculateSHA256Hash(neAlias + neType);
 
                         // Create a new dictionary for the row with "NETWORK_SID" at the beginning
                         var newRow = new Dictionary<string, string>
                 {
                     { "NETWORK_SID", Math.Abs( networkSid .GetHashCode()).ToString() },
-                    { "DATETIME_KEY", test.ToString() }
+                    { "DATETIME_KEY", reformat.ToString() }
                 };
 
                         // Copy the existing columns to the new dictionary
@@ -267,9 +262,7 @@ namespace BabyNiProject
                     rowsToDelete.Add(row);
 
                 }
-                // Add or modify other columns as needed
-                // row["new_column_rfinput"] = "new_value_for_rfinput"; // Add a new column
-                row.Remove("Position"); // Delete a specific column
+                row.Remove("Position"); 
                 row.Remove("MeanRxLevel1m");
                 row.Remove("IdLogNum");
                 row.Remove("FailureDescription");

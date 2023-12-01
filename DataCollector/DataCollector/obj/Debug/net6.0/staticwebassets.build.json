@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "i3zCabWzNkWs1242pmO6l4QMPNMLgZAEFP20s37tn9U=",
+  "Source": "DataCollector",
+  "BasePath": "_content/DataCollector",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

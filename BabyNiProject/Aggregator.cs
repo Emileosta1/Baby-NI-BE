@@ -7,8 +7,8 @@ namespace BabyNiProject
 {
     public class Aggregator
     {
-        private string connectionString; // Your Vertica database connection string
-        private VerticaConnection connection; // The connection object
+        private string connectionString;
+        private VerticaConnection connection;
 
         public Aggregator(IConfiguration configuration)
         {
@@ -30,15 +30,11 @@ namespace BabyNiProject
 
                 if (hourlyTableExists && dailyTableExists)
                 {
-                    // Execute queries for existing hourly and daily tables
                     ExecuteExistingTablesQueries();
                 }
                 else
                 {
-                    // Execute queries for creating hourly and daily tables
                     ExecuteCreateTablesQueries();
-
-                    // Additional processing steps if needed
                 }
             }
             else
@@ -67,8 +63,7 @@ namespace BabyNiProject
             string insert1 = "Insert into TRANS_MW_AGG_SLOT_HOURLY select date_trunc('hour',rp.Time) as Time,rf.NeAlias,rf.NeType,rf.DATETIME_KEY, rf.NETWORK_SID, Max(rf.RFInputPower) as RSL_INPUT_POWER,Max(rp.MaxRxLevel) as MaxRxLevel, ABS(MAX(rf.RFInputPower)) - ABS(MAX(rp.MaxRxLevel)) as RSL_DEVIATION from  RfInput rf Inner JOIN RadioLink rp on rf.NETWORK_SID=rp.NETWORK_SID group by 1,2,3,4,5";
             string insert2 = "Insert into TRANS_MW_AGG_SLOT_DAILY select  date_trunc('DAY',rp.Time) as Time, rf.NeAlias, rf.NeType, rf.DATETIME_KEY, rf.NETWORK_SID, Max(rf.RFInputPower) as RSL_INPUT_POWER, Max(rp.MaxRxLevel) as MaxRxLevel, ABS(MAX(rf.RFInputPower)) - ABS(MAX(rp.MaxRxLevel)) as RSL_DEVIATION from  RfInput rf Inner JOIN RadioLink rp on rf.NETWORK_SID=rp.NETWORK_SID group by 1,2,3,4,5";
 
-            // Add queries to execute when hourly and daily tables exist
-            Console.WriteLine("Executing queries for existing hourly and daily tables...");
+            Console.WriteLine("Executed queries for existing hourly and daily tables...");
 
             ExecuteQuery(truncate1);
             ExecuteQuery(truncate2);
@@ -78,10 +73,8 @@ namespace BabyNiProject
 
         private void ExecuteCreateTablesQueries()
         {
-            // Add queries to execute when hourly and daily tables need to be created
             Console.WriteLine("Executing queries to create hourly and daily tables...");
 
-            // Example queries (modify as needed)
             string create1 = "CREATE TABLE TRANS_MW_AGG_SLOT_HOURLY (Time TIMESTAMP, NeAlias VARCHAR(30), NeType VARCHAR(30), DATETIME TIMESTAMP, NETWORK_SID INT, RSL_INPUT_POWER FLOAT, MaxRxLevel FLOAT, RSL_Deviation FLOAT);";
             string create2 = "CREATE TABLE TRANS_MW_AGG_SLOT_DAILY (Time TIMESTAMP, NeAlias VARCHAR(30), NeType VARCHAR(30), DATETIME TIMESTAMP, NETWORK_SID INT, RSL_INPUT_POWER FLOAT, MaxRxLevel FLOAT, RSL_Deviation FLOAT);";
             string insert1 = "Insert into TRANS_MW_AGG_SLOT_HOURLY select date_trunc('hour',rp.Time) as Time,rf.NeAlias,rf.NeType,rf.DATETIME_KEY, rf.NETWORK_SID, Max(rf.RFInputPower) as RSL_INPUT_POWER,Max(rp.MaxRxLevel) as MaxRxLevel, ABS(MAX(rf.RFInputPower)) - ABS(MAX(rp.MaxRxLevel)) as RSL_DEVIATION from  RfInput rf Inner JOIN RadioLink rp on rf.NETWORK_SID=rp.NETWORK_SID group by 1,2,3,4,5";
@@ -93,12 +86,10 @@ namespace BabyNiProject
             ExecuteQuery(insert1);
             ExecuteQuery(insert2);
 
-            // Additional processing steps if needed
         }
 
         private void ExecuteQuery(string query)
         {
-            // Example method to execute queries, modify based on your database library
             using (var command = connection.CreateCommand())
             {
                 command.CommandText = query;

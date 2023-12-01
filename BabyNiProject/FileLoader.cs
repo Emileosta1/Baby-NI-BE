@@ -8,7 +8,7 @@ namespace BabyNiProject
 {
     public class FileLoader
     {
-        private string connectionString; // Your Vertica database connection string
+        private string connectionString; 
 
         public FileLoader(IConfiguration configuration)
         {
@@ -70,7 +70,6 @@ namespace BabyNiProject
         {
             using (var command = connection.CreateCommand())
             {
-                // Define the schema and columns for the table based on the table name
                 string columnDefinition = GetColumnDefinition(tableName);
                 command.CommandText = $"CREATE TABLE {tableName} {columnDefinition}";
                 command.ExecuteNonQuery();
@@ -79,7 +78,6 @@ namespace BabyNiProject
 
         private string GetColumnDefinition(string tableName)
         {
-            // Define different column definitions based on the table name
             if (tableName.Equals("RadioLink", StringComparison.OrdinalIgnoreCase))
             {
                 return "(NETWORK_SID INT, DATETIME_KEY TIMESTAMP, NEID FLOAT, OBJECT VARCHAR(255),TIME TIMESTAMP, \"INTERVAL\" INT, DIRECTION VARCHAR(255), NEALIAS VARCHAR(255), NETYPE VARCHAR(255), RXLEVELBELOWTS1 INT, RXLEVELBELOWTS2 INT, MINRXLEVEL FLOAT, MAXRXLEVEL FLOAT, TXLEVELABOVETS1 INT, MINTXLEVEL FLOAT, MAXTXLEVEL FLOAT, FAILUREDESCRIPTION VARCHAR(255), LINK VARCHAR(255), TID VARCHAR(255), FARENDTID VARCHAR(255), SLOT INT, PORT INT)";
@@ -106,23 +104,15 @@ namespace BabyNiProject
             {
                 try
                 {
-                    /*if (!File.Exists(filePath))
-                    {
-                        Console.WriteLine($"File not found: {filePath}");
-                        continue;
-                    }*/
-
                     string fileName = Path.GetFileName(filePath);
 
                     using (var command = connection.CreateCommand())
                     {
-                        // Use parameterized query
                         command.CommandText = $"COPY {tableName} FROM LOCAL '{filePath}' DELIMITER ',' SKIP 1";
 
                         command.ExecuteNonQuery();
                         Console.WriteLine($"Loaded {fileName} to Vertica table '{tableName}'.");
 
-                        // Move the file to the loader directory
                         string destinationPath = Path.Combine(loaderDirectory, fileName);
                         File.Move(filePath, destinationPath);
                         Console.WriteLine($"Moved {fileName} to {loaderDirectory}.");
@@ -130,7 +120,6 @@ namespace BabyNiProject
                 }
                 catch (Exception ex)
                 {
-                    // Log the exception
                     Console.WriteLine($"Error loading file {filePath}: {ex.Message}");
                 }
             }

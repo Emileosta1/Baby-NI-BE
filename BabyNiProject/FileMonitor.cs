@@ -1,4 +1,6 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
+using System.IO;
 
 namespace BabyNiProject
 {
@@ -7,16 +9,11 @@ namespace BabyNiProject
         private readonly IConfiguration configuration;
         private readonly FileSystemWatcher watcher;
         private readonly string fileFilter;
-        private readonly int monitoringInterval = 5000; // Interval in milliseconds (e.g., 5 seconds)
-        private long previousFileSize = 0;
-        private DateTime lastSizeCheckTime;
         private readonly string parserDirectory;
         private readonly string archiveDirectory;
         private readonly FileParser fileParser = new FileParser();
         private readonly FileLoader fileLoader;
         private readonly Aggregator aggregator;
-       
-
 
         public FileMonitor(string directoryPath, string parserDir, string archiveDir, FileLoader loader, IConfiguration configuration)
         {
@@ -37,7 +34,6 @@ namespace BabyNiProject
             watcher.Renamed += OnFileRenamed;
             fileLoader = loader;
             aggregator = new Aggregator(configuration);
-
         }
 
         public void Start()
@@ -45,9 +41,6 @@ namespace BabyNiProject
             try
             {
                 watcher.EnableRaisingEvents = true;
-                lastSizeCheckTime = DateTime.Now;
-
-                //var sizeCheckTimer = new Timer(CheckFileSize, null, 0, monitoringInterval);
             }
             catch (Exception ex)
             {
@@ -93,17 +86,14 @@ namespace BabyNiProject
                     fileLoader.LoadFilesToVertica(parserDirectory);
 
                     aggregator.AggregateData();
-
-
                 }
                 else
                 {
+                    Console.WriteLine("Duplicate File Detected and Deleted!");
                     File.Delete(filePath);
                 }
             }
-
         }
-
 
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
@@ -119,9 +109,6 @@ namespace BabyNiProject
                         fileParser.ConvertToCsv(filePath);
                         Console.WriteLine($"Converted {e.Name} to CSV.");
                     }
-
-                    previousFileSize = new FileInfo(filePath).Length;
-                    lastSizeCheckTime = DateTime.Now;
                 }
             }
             catch (Exception ex)
@@ -156,26 +143,18 @@ namespace BabyNiProject
                         Console.WriteLine($"Deleted {fileName} from the original folder.");
                         fileLoader.LoadFilesToVertica(parserDirectory);
                         aggregator.AggregateData();
-
-
                     }
                     else
                     {
                         File.Delete(sourceFilePath);
                     }
-
-                    previousFileSize = 0;
-                    lastSizeCheckTime = DateTime.Now;
                 }
-
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error handling file creation event: {ex.Message}");
             }
         }
-
-
 
         private void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
@@ -211,26 +190,5 @@ namespace BabyNiProject
         {
             return string.Equals(Path.GetExtension(fileName), extension, StringComparison.OrdinalIgnoreCase);
         }
-
-        /* private void CheckFileSize(object state)
-         {
-             if ((DateTime.Now - lastSizeCheckTime).TotalMilliseconds >= monitoringInterval)
-             {
-                 lastSizeCheckTime = DateTime.Now;
-                 string filePath = Path.Combine(watcher.Path, "example.txt");
-
-                 if (File.Exists(filePath))
-                 {
-                     long currentFileSize = new FileInfo(filePath).Length;
-
-                     if (currentFileSize == previousFileSize)
-                     {
-                         Console.WriteLine("File size remains constant. It may be fully read.");
-                     }
-
-                     previousFileSize = currentFileSize;
-                 }
-             }
-         }*/
     }
 }
