@@ -34,6 +34,12 @@ namespace BabyNiProject
             watcher.Renamed += OnFileRenamed;
             fileLoader = loader;
             aggregator = new Aggregator(configuration);
+
+            // Check if parser directory exists, if not, create it
+            if (!Directory.Exists(parserDirectory))
+            {
+                Directory.CreateDirectory(parserDirectory);
+            }
         }
 
         public void Start()
